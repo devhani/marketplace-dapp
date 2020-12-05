@@ -1,8 +1,13 @@
 import './App.css';
-import {Component} from "react";
+import React, {Component} from "react";
 import Web3 from "web3";
 import Header from "./components/Header";
+import Main from "./components/Main";
 import Marketplace from "./abis/Marketplace.json";
+import {
+  Dimmer,
+  Loader
+} from "semantic-ui-react";
 
 class App extends Component {
 
@@ -33,7 +38,9 @@ class App extends Component {
     const networkData = Marketplace.networks[networkId]
     if(networkData) {
       const marketplace = new web3.eth.Contract(Marketplace.abi, networkData.address)
-      console.log(marketplace)
+      this.setState({ marketplace })
+      const productCount = await marketplace.methods.productCount().call({ from: this.state.account })
+      this.setState({ loading: false })
     } else {
       window.alert('Marketplace contract not deployed to detected network.')
     }
@@ -49,11 +56,24 @@ class App extends Component {
     }
   }
 
+  createProduct = (name, price) => {
+    this.setState({ loading: true })
+    this.state.marketplace.methods.createProduct(name, price).send({ from: this.state.account })
+      .once('receipt', (receipt) => {
+        this.setState({ loading: false })
+      })
+  }
+
   render() {
     return (
       <div className="App">
         <Header account={this.state.account} />
-        <div style={{marginTop: '50px'}}>Hi !</div>
+        <div id="content" style={{marginTop: '50px'}}>
+          { this.state.loading
+            ? <Dimmer active inverted><Loader>Loading...</Loader></Dimmer>
+            : <Main createProduct={this.createProduct} />
+          }
+        </div>
       </div>
     );
   }

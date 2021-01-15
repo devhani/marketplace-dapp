@@ -40,6 +40,14 @@ class App extends Component {
       const marketplace = new web3.eth.Contract(Marketplace.abi, networkData.address)
       this.setState({ marketplace })
       const productCount = await marketplace.methods.productCount().call({ from: this.state.account })
+      this.setState({ productCount })
+      // Load products
+      for (let i = 1; i<= productCount; i++) {
+        const product = await marketplace.methods.products(i).call()
+        this.setState({
+          products: [...this.state.products, product]
+        })
+      }
       this.setState({ loading: false })
     } else {
       window.alert('Marketplace contract not deployed to detected network.')
@@ -64,6 +72,14 @@ class App extends Component {
       })
   }
 
+  purchaseProduct = (id, price) => {
+    this.setState({ loading: true })
+    this.state.marketplace.methods.purchaseProduct(id).send({ from: this.state.account, value: price })
+      .once('receipt', (receipt) => {
+        this.setState({ loading: false })
+      })
+  }
+
   render() {
     return (
       <div className="App">
@@ -71,7 +87,11 @@ class App extends Component {
         <div id="content" style={{marginTop: '50px'}}>
           { this.state.loading
             ? <Dimmer active inverted><Loader>Loading...</Loader></Dimmer>
-            : <Main createProduct={this.createProduct} />
+            : <Main
+                products={this.state.products}
+                createProduct={this.createProduct}
+                purchaseProduct={this.purchaseProduct}
+              />
           }
         </div>
       </div>

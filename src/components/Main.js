@@ -51,27 +51,28 @@ class Header extends Component {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                <Table.Row>
-                  <Table.Cell>1</Table.Cell>
-                  <Table.Cell>iPhone x</Table.Cell>
-                  <Table.Cell>1 Eth</Table.Cell>
-                  <Table.Cell>0x39C7BC5496f4eaaa1fF75d88E079C22f0519E7b9</Table.Cell>
-                  <Table.Cell><Button primary>Buy</Button></Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>2</Table.Cell>
-                  <Table.Cell>Macbook Pro</Table.Cell>
-                  <Table.Cell>3 eth</Table.Cell>
-                  <Table.Cell>0x39C7BC5496f4eaaa1fF75d88E079C22f0519E7b9</Table.Cell>
-                  <Table.Cell><Button primary>Buy</Button></Table.Cell>
-                </Table.Row>
-                <Table.Row>
-                  <Table.Cell>3</Table.Cell>
-                  <Table.Cell>Airpods</Table.Cell>
-                  <Table.Cell>0.5 eth</Table.Cell>
-                  <Table.Cell>0x39C7BC5496f4eaaa1fF75d88E079C22f0519E7b9</Table.Cell>
-                  <Table.Cell><Button primary>Buy</Button></Table.Cell>
-                </Table.Row>
+                {
+                  this.props.products.map((product, key) => {
+                    return (
+                      <Table.Row key={key}>
+                        <Table.Cell>{ product.id.toString() }</Table.Cell>
+                        <Table.Cell>{ product.name }</Table.Cell>
+                        <Table.Cell>{ window.web3.utils.fromWei(product.price, 'Ether') } Eth</Table.Cell>
+                        <Table.Cell>{ product.owner }</Table.Cell>
+                        <Table.Cell>
+                          { !product.purchased ?
+                          <Button
+                            primary
+                            onClick={() => {
+                              this.props.purchaseProduct(product.id, product.price)
+                            }}
+                          >Buy</Button>
+                          : "Already sold..." }
+                        </Table.Cell>
+                      </Table.Row>
+                    )
+                  })
+                }
               </Table.Body>
             </Table>
           </Container>
